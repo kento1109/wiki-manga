@@ -1,10 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import List
 
 import MeCab
-
 import extract
+
+app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 app = FastAPI()
 mc = MeCab.Tagger ("-Owakati -d /opt/homebrew/lib/mecab/dic/mecab-ipadic-neologd")
@@ -29,8 +34,16 @@ def extract_key_tokens(text):
         node = node.next
     return extracted_tokens
 
-@app.post("/search/")
-def search_items(query: Query):
-    query_tokens = extract_key_tokens(query.text)
-    result = extract.serach_by_query(query_tokens)
-    return result
+@app.get("/search", response_class=HTMLResponse)
+def search_items(request: Request):
+    return templates.TemplateResponse("input.html", {"request": request})
+
+@app.post("/result", response_class=HTMLResponse)
+def show_items(request: Request, text: str = Form(...)):
+    print("text", text)
+    print("tagger", mc.parse(text))
+    query_tokens = extract_key_tokens(text)
+    print("query_tokens", query_tokens)
+    results = extract.serach_by_query(query_tokens)
+    print(type(results), results)
+    return templates.TemplateResponse("result.html", {"request": request, "results": results})

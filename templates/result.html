@@ -1,0 +1,21 @@
+
+<html>
+<head>
+    <title>結果</title>
+</head>
+<body>
+    <table border="1" >
+        <tr>
+            <td>タイトル</td>
+            <td>キーワード</td>
+        </tr>
+        {% for result in results %}
+            <tr>
+                <td>{{ result.title }}</td>
+                <td>{{ ",".join(result.matched_tokens) }}</td>
+            </tr>
+        {% endfor %}
+        </tr>
+    </table>
+</body>
+</html>
